@@ -2,6 +2,9 @@
 
 ## Credits
 
+**Developed by [Philip Thyssen](https://github.com/philipthyssen) and [Piet Verwilligen](https://github.com/pietverwilligen).**
+
+
 ## Setup (@lxplus)
 
 Setup the environment:
