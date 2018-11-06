@@ -7,7 +7,7 @@
 Setup the environment:
 
 ```
-cd /cvmfs/cms.cern.ch/slc6_amd64_gcc630/cms/cmssw/CMSSW_10_1_9/ ## Need CMSSW, version does not matter.
+cd /cvmfs/cms.cern.ch/slc6_amd64_gcc630/cms/cmssw/CMSSW_10_1_9/ 
 cmsenv
 cd -
 ```
