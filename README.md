@@ -25,6 +25,7 @@ Compile:
 
 ```
 cd RPCFebConnectivityTest
+# ~/cmakeInstall/cmake-3.15.0-rc1/bin/cmake -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_STANDARD=11 .
 cmake .
 make
 ```
