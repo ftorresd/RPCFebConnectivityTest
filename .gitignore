@@ -1,3 +1,7 @@
 ._*
 **/._*
 bin
+extern/src/
+extern/tmp/
+CMakeCache.txt
+CMakeFiles/
