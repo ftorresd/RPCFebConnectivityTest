@@ -21,13 +21,45 @@ Clone the source code:
 git clone git@github.com:ftorresd/RPCFebConnectivityTest.git
 ```
 
-Compile:
+## Compile:
+
+Export $ROOTSYS. Depends on your system config. Could be that this is even already set.
+
+```
+export ROOTSYS=/usr/local/Cellar/root/6.18.04_1
+```
 
 ```
 cd RPCFebConnectivityTest
 # ~/cmakeInstall/cmake-3.15.0-rc1/bin/cmake -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_STANDARD=11 .
 cmake .
 make
+```
+
+## Docker
+
+Launch the container. From inside `RPCFebConnectivityTest`:
+
+```
+docker pull ubuntu
+docker run -v `pwd`:/febconntest -it ubuntu
+```
+
+Inside the container.
+
+```
+# install wget, cmake and g++
+apt update -y && apt upgrade -y 
+apt install -y wget cmake g++
+
+# install ROOT
+wget https://root.cern/download/root_v6.22.00.Linux-ubuntu19-x86_64-gcc9.2.tar.gz
+tar -xzf root_v6.22.00.Linux-ubuntu19-x86_64-gcc9.2.tar.gz
+source root/bin/thisroot.sh 
+
+# compile
+cd /febconntest
+cmake .
 ```
 
 ## Running
