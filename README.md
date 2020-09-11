@@ -1,6 +1,6 @@
 # RPC FebConnectivity Test Analyzer
 
-## Credits
+## Original Authors
 
 **Developed by [Philip Thyssen](https://github.com/philipthyssen) and [Piet Verwilligen](https://github.com/pietverwilligen).**
 
