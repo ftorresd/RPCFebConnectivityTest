@@ -1,3 +1,7 @@
-## Build image
+## Build ENV image
 
-`docker build --tag ftorresd/rpcfebconnectivitytest .`
+`cd build ; docker build --tag ftorresd/rpcfebconnectivitytest_buildenv . ; cd ..`
+
+## Build deploy image
+
+`cd build ; docker build --tag ftorresd/rpcfebconnectivitytest . ; cd ..`

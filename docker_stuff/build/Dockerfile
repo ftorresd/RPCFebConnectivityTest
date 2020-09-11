@@ -7,7 +7,6 @@ ENV LANG=C.UTF-8
 
 WORKDIR /opt
 
-
 RUN apt update -y && \
     apt upgrade -y
 
@@ -18,16 +17,12 @@ RUN apt install -y wget cmake g++ && \
     wget https://root.cern/download/root_v6.22.00.Linux-ubuntu19-x86_64-gcc9.2.tar.gz && \
     tar -xzf root_v6.22.00.Linux-ubuntu19-x86_64-gcc9.2.tar.gz && \
     rm -rf root_v6.22.00.Linux-ubuntu19-x86_64-gcc9.2.tar.gz && \
-    source root/bin/thisroot.sh && \
     echo /opt/root/lib >> /etc/ld.so.conf && \
     ldconfig
-
-
 
 ENV ROOTSYS /opt/root
 ENV PATH $ROOTSYS/bin:$PATH
 ENV PYTHONPATH $ROOTSYS/lib:$PYTHONPATH
 ENV CLING_STANDARD_PCH none
-
 
 CMD ["bash"]
