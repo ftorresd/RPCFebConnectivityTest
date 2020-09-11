@@ -38,27 +38,16 @@ make
 
 ## Docker
 
-Launch the container. From inside `RPCFebConnectivityTest`:
+Launch the container.
 
 ```
-docker pull ubuntu
-docker run -v `pwd`:/febconntest -it ubuntu
+docker run -v `pwd`:/opt/febconntest -it ftorresd/rpcfebconnectivitytest
 ```
 
 Inside the container.
 
 ```
-# install wget, cmake and g++
-apt update -y && apt upgrade -y 
-apt install -y wget cmake g++
-
-# install ROOT
-wget https://root.cern/download/root_v6.22.00.Linux-ubuntu19-x86_64-gcc9.2.tar.gz
-tar -xzf root_v6.22.00.Linux-ubuntu19-x86_64-gcc9.2.tar.gz
-source root/bin/thisroot.sh 
-
-# compile
-cd /febconntest
+cd /opt/febconntest
 cmake .
 ```
 

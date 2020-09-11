@@ -1,3 +1,3 @@
 ## Build image
 
-docker build --tag ftorresd/RPCFebConnectivityTest .
+`docker build --tag ftorresd/rpcfebconnectivitytest .`
