@@ -487,168 +487,171 @@ int main(int _argc, char *_argv[])
 
         int _linkboard_color(10000), _channel_color(10000), _strip_color(10000);
 
-        if (febconntest_.getActiveFebConnectorId() // skip the first connectivitytest step
-            && roll_selection_.matches(febconntest_.getActiveFebConnector().getRoll()))
+        if (_nsnapshot > 1 ) // skip the first connectivitytest step
         {
-            rpct::fct::FebConnector &_active_febconnector = febconntest_.getActiveFebConnector();
-            rpct::tools::RollId _active_roll = _active_febconnector.getRoll();
-            rpct::tools::RollId _active_chamber = _active_roll.getChamberId();
-            rpct::fct::LinkBoard &_active_linkboard = _active_febconnector.getLinkBoard();
-            rpct::fct::LinkBox &_active_linkbox = _active_linkboard.getLinkBox();
-            bool _active_is_dead(false);
-
-            { // offset?
-                rpct::fct::FebChip const &_febchip_0 = _active_febconnector.getFebPart().getFebChip(0);
-                rpct::fct::FebChip const &_febchip_1 = _active_febconnector.getFebPart().getFebChip(1);
-
-                if (offset_chip_ignore_.find(_febchip_0.getId()) == offset_chip_ignore_.end() && std::abs((int)_febchip_0.getVThRead() - (int)_febchip_0.getVThSet()) > vth_offset_problem_)
-                    offset_chip_problem_.insert(std::pair<rpct::hwd::integer_type, int>(_febchip_0.getId(), (int)_febchip_0.getVThRead() - _febchip_0.getVThSet()));
-                if (offset_chip_ignore_.find(_febchip_1.getId()) == offset_chip_ignore_.end() && std::abs((int)_febchip_1.getVThRead() - (int)_febchip_1.getVThSet()) > vth_offset_problem_)
-                    offset_chip_problem_.insert(std::pair<rpct::hwd::integer_type, int>(_febchip_1.getId(), (int)_febchip_1.getVThRead() - _febchip_1.getVThSet()));
-            }
-
-            { // active?
-                int _channel = (_active_febconnector.getPosition() - 1) * rpct::fct::FebConnectorStrips::npins_;
-                int _active_channels[2] = {0, 0};
-                for (int _pin = 1; _pin <= rpct::fct::FebConnectorStrips::npins_; ++_pin, ++_channel)
-                    if (_active_febconnector.getStrips().isPinActive(_pin) && _active_linkboard.getRate(_channel) > rate_active_)
-                        ++(_active_channels[(_pin - 1) / (rpct::fct::FebConnectorStrips::npins_ / 2)]);
-
-                if ((double)(_active_channels[0] + _active_channels[1]) / (double)_active_febconnector.getStrips().getNStrips() < channel_fraction_ && offset_connector_ignore_index_.find(_active_febconnector.getId()) == offset_connector_ignore_index_.end())
-                {
-                    dead_connector_.push_back(_active_febconnector.getId());
-                    _active_is_dead = true;
-                }
-                else if (((double)(_active_channels[0]) / (double)_active_febconnector.getStrips().getNStrips() < channel_fraction_ || (double)(_active_channels[1]) / (double)_active_febconnector.getStrips().getNStrips() < channel_fraction_) && offset_connector_ignore_index_.find(_active_febconnector.getId()) == offset_connector_ignore_index_.end())
-                    partially_dead_connector_.push_back(_active_febconnector.getId());
-            }
-
-            _strip_color = _active_febconnector.getRollConnector() + 10000;
-            _channel_color = _active_febconnector.getPosition() + 10000;
-            _linkboard_color = _active_linkboard.getPosition() + 10000;
-
-            // Indicator Histograms and LinkBoard Histogram
-            if (linkboard_histograms_.find(_active_linkboard.getId()) == linkboard_histograms_.end())
+            if (febconntest_.getActiveFebConnectorId() 
+                && roll_selection_.matches(febconntest_.getActiveFebConnector().getRoll()))
             {
-                name_.str("");
-                name_ << _active_linkbox.getName() << "_LB" << _active_linkboard.getPosition() << "_ind";
-                title_.str("");
-                title_ << "LB" << _active_linkboard.getPosition()
-                       << "CB" << _active_febconnector.getFebPart().getFebBoard().getFebDistributionBoard().getControlBoard().getPosition()
-                       << " J" << _active_febconnector.getFebPart().getFebBoard().getFebDistributionBoard().getPosition()
-                       << " / " << _active_febconnector.getRoll();
-                TH1F *_linkboard_indicator_histogram = new TH1F(name_.str().c_str(), title_.str().c_str(), 120, .5, 20.5);
-                _linkboard_indicator_histogram->SetFillColor(_linkboard_color);
-                _linkboard_indicator_histogram->SetLineColor(_linkboard_color);
-                for (std::vector<rpct::fct::FebConnector *>::const_iterator _febconnector_it = _active_linkboard.getFebConnectors().begin(); _febconnector_it != _active_linkboard.getFebConnectors().end(); ++_febconnector_it)
-                    if (*_febconnector_it && (*_febconnector_it)->isSelected())
-                        _linkboard_indicator_histogram->SetBinContent((_active_linkboard.getPosition() - 1) * rpct::fct::LinkBoard::nfebconnectors_ + (*_febconnector_it)->getPosition(), 2);
-                _linkboard_indicator_histogram->Write();
-                linkboard_stacks_[_active_linkbox.getId()]->Add(_linkboard_indicator_histogram);
-                linkboard_legends_[_active_linkbox.getId()]->AddEntry(_linkboard_indicator_histogram, _linkboard_indicator_histogram->GetTitle(), "f");
+                rpct::fct::FebConnector &_active_febconnector = febconntest_.getActiveFebConnector();
+                rpct::tools::RollId _active_roll = _active_febconnector.getRoll();
+                rpct::tools::RollId _active_chamber = _active_roll.getChamberId();
+                rpct::fct::LinkBoard &_active_linkboard = _active_febconnector.getLinkBoard();
+                rpct::fct::LinkBox &_active_linkbox = _active_linkboard.getLinkBox();
+                bool _active_is_dead(false);
 
-                name_.str("");
-                name_ << _active_linkbox.getName() << "_LB" << _active_linkboard.getPosition();
-                TH1F *_linkboard_histogram =
-                    (linkboard_histograms_[_active_linkboard.getId()] = new TH1F(name_.str().c_str(), title_.str().c_str(), 120, .5, 20.5));
-                _linkboard_histogram->SetLineColor(_linkboard_color);
-                _linkboard_histogram->SetLineWidth(2);
-                linkboard_stacks_[_active_linkbox.getId()]->Add(_linkboard_histogram);
-            }
+                { // offset?
+                    rpct::fct::FebChip const &_febchip_0 = _active_febconnector.getFebPart().getFebChip(0);
+                    rpct::fct::FebChip const &_febchip_1 = _active_febconnector.getFebPart().getFebChip(1);
 
-            name_.str("");
-            title_.str("");
-            name_ << _active_linkboard.getName() << "_" << _active_febconnector.getPosition() << "_ind";
-            title_ << "LB C" << _active_febconnector.getPosition() << " - " << _active_roll << " C" << _active_febconnector.getRollConnector();
-            TH1F *_channel_indicator_histogram = new TH1F(name_.str().c_str(), title_.str().c_str(), 96, -.5, 95.5);
-            _channel_indicator_histogram->SetFillColor(_channel_color);
-            _channel_indicator_histogram->SetLineColor(_channel_color);
-            channel_stacks_[_active_linkboard.getId()]->Add(_channel_indicator_histogram);
-            channel_legends_[_active_linkboard.getId()]->AddEntry(_channel_indicator_histogram, _channel_indicator_histogram->GetTitle(), "f");
-
-            name_.str("");
-            title_.str("");
-            name_ << "RPCDetId_" << _active_roll.getRPCDetId().id() << "_" << _active_febconnector.getRollConnector() << "_ind";
-            title_ << "RPC C" << _active_febconnector.getRollConnector() << " - " << _active_linkbox.getName() << " LB" << _active_linkboard.getPosition() << " C" << _active_febconnector.getPosition();
-            TH1F *_strip_indicator_histogram = new TH1F(name_.str().c_str(), title_.str().c_str(), 96, .5, 96.5);
-            _strip_indicator_histogram->SetFillColor(_strip_color);
-            _strip_indicator_histogram->SetLineColor(_strip_color);
-            strip_stacks_[_active_roll]->Add(_strip_indicator_histogram);
-            strip_legends_[_active_roll]->AddEntry(_strip_indicator_histogram, _strip_indicator_histogram->GetTitle(), "f");
-
-            // Fill the indicator histograms
-            int _channel = (_active_febconnector.getPosition() - 1) * rpct::fct::FebConnectorStrips::npins_;
-            for (int _pin = 1; _pin <= rpct::fct::FebConnectorStrips::npins_; ++_pin, ++_channel)
-                if (_active_febconnector.getStrips().isPinActive(_pin))
-                {
-                    _channel_indicator_histogram->SetBinContent(_channel + 1, 2);
-                    _strip_indicator_histogram->SetBinContent(_active_febconnector.getStrips().getStrip(_pin), 2);
+                    if (offset_chip_ignore_.find(_febchip_0.getId()) == offset_chip_ignore_.end() && std::abs((int)_febchip_0.getVThRead() - (int)_febchip_0.getVThSet()) > vth_offset_problem_)
+                        offset_chip_problem_.insert(std::pair<rpct::hwd::integer_type, int>(_febchip_0.getId(), (int)_febchip_0.getVThRead() - _febchip_0.getVThSet()));
+                    if (offset_chip_ignore_.find(_febchip_1.getId()) == offset_chip_ignore_.end() && std::abs((int)_febchip_1.getVThRead() - (int)_febchip_1.getVThSet()) > vth_offset_problem_)
+                        offset_chip_problem_.insert(std::pair<rpct::hwd::integer_type, int>(_febchip_1.getId(), (int)_febchip_1.getVThRead() - _febchip_1.getVThSet()));
                 }
 
-            _channel_indicator_histogram->Write();
-            _strip_indicator_histogram->Write();
+                { // active?
+                    int _channel = (_active_febconnector.getPosition() - 1) * rpct::fct::FebConnectorStrips::npins_;
+                    int _active_channels[2] = {0, 0};
+                    for (int _pin = 1; _pin <= rpct::fct::FebConnectorStrips::npins_; ++_pin, ++_channel)
+                        if (_active_febconnector.getStrips().isPinActive(_pin) && _active_linkboard.getRate(_channel) > rate_active_)
+                            ++(_active_channels[(_pin - 1) / (rpct::fct::FebConnectorStrips::npins_ / 2)]);
 
-            // Fill Histograms
-            TH1F *_linkboard_histogram = linkboard_histograms_[_active_linkboard.getId()];
+                    if ((double)(_active_channels[0] + _active_channels[1]) / (double)_active_febconnector.getStrips().getNStrips() < channel_fraction_ && offset_connector_ignore_index_.find(_active_febconnector.getId()) == offset_connector_ignore_index_.end())
+                    {
+                        dead_connector_.push_back(_active_febconnector.getId());
+                        _active_is_dead = true;
+                    }
+                    else if (((double)(_active_channels[0]) / (double)_active_febconnector.getStrips().getNStrips() < channel_fraction_ || (double)(_active_channels[1]) / (double)_active_febconnector.getStrips().getNStrips() < channel_fraction_) && offset_connector_ignore_index_.find(_active_febconnector.getId()) == offset_connector_ignore_index_.end())
+                        partially_dead_connector_.push_back(_active_febconnector.getId());
+                }
 
-            for (std::vector<rpct::fct::LinkBoard *>::const_iterator _linkboard_it = _active_linkbox.getLinkBoards().begin(); _linkboard_it != _active_linkbox.getLinkBoards().end(); ++_linkboard_it)
-                if (*_linkboard_it)
-                    for (std::vector<rpct::fct::FebConnector *>::const_iterator _febconnector_it = (*_linkboard_it)->getFebConnectors().begin(); _febconnector_it != (*_linkboard_it)->getFebConnectors().end(); ++_febconnector_it)
-                        if (*_febconnector_it)
-                        {
-                            rpct::fct::FebConnector const &_febconnector(*(*_febconnector_it));
-                            if (_febconnector.isSelected())
-                                _linkboard_histogram->AddBinContent(((*_linkboard_it)->getPosition() - 1) * rpct::fct::LinkBoard::nfebconnectors_ + (*_febconnector_it)->getPosition(), (*_linkboard_it)->getAvgRate((*_febconnector_it)->getPosition()));
-                            if (_febconnector.getRoll().getChamberId() == _active_chamber)
+                _strip_color = _active_febconnector.getRollConnector() + 10000;
+                _channel_color = _active_febconnector.getPosition() + 10000;
+                _linkboard_color = _active_linkboard.getPosition() + 10000;
+
+                // Indicator Histograms and LinkBoard Histogram
+                if (linkboard_histograms_.find(_active_linkboard.getId()) == linkboard_histograms_.end())
+                {
+                    name_.str("");
+                    name_ << _active_linkbox.getName() << "_LB" << _active_linkboard.getPosition() << "_ind";
+                    title_.str("");
+                    title_ << "LB" << _active_linkboard.getPosition()
+                           << "CB" << _active_febconnector.getFebPart().getFebBoard().getFebDistributionBoard().getControlBoard().getPosition()
+                           << " J" << _active_febconnector.getFebPart().getFebBoard().getFebDistributionBoard().getPosition()
+                           << " / " << _active_febconnector.getRoll();
+                    TH1F *_linkboard_indicator_histogram = new TH1F(name_.str().c_str(), title_.str().c_str(), 120, .5, 20.5);
+                    _linkboard_indicator_histogram->SetFillColor(_linkboard_color);
+                    _linkboard_indicator_histogram->SetLineColor(_linkboard_color);
+                    for (std::vector<rpct::fct::FebConnector *>::const_iterator _febconnector_it = _active_linkboard.getFebConnectors().begin(); _febconnector_it != _active_linkboard.getFebConnectors().end(); ++_febconnector_it)
+                        if (*_febconnector_it && (*_febconnector_it)->isSelected())
+                            _linkboard_indicator_histogram->SetBinContent((_active_linkboard.getPosition() - 1) * rpct::fct::LinkBoard::nfebconnectors_ + (*_febconnector_it)->getPosition(), 2);
+                    _linkboard_indicator_histogram->Write();
+                    linkboard_stacks_[_active_linkbox.getId()]->Add(_linkboard_indicator_histogram);
+                    linkboard_legends_[_active_linkbox.getId()]->AddEntry(_linkboard_indicator_histogram, _linkboard_indicator_histogram->GetTitle(), "f");
+
+                    name_.str("");
+                    name_ << _active_linkbox.getName() << "_LB" << _active_linkboard.getPosition();
+                    TH1F *_linkboard_histogram =
+                        (linkboard_histograms_[_active_linkboard.getId()] = new TH1F(name_.str().c_str(), title_.str().c_str(), 120, .5, 20.5));
+                    _linkboard_histogram->SetLineColor(_linkboard_color);
+                    _linkboard_histogram->SetLineWidth(2);
+                    linkboard_stacks_[_active_linkbox.getId()]->Add(_linkboard_histogram);
+                }
+
+                name_.str("");
+                title_.str("");
+                name_ << _active_linkboard.getName() << "_" << _active_febconnector.getPosition() << "_ind";
+                title_ << "LB C" << _active_febconnector.getPosition() << " - " << _active_roll << " C" << _active_febconnector.getRollConnector();
+                TH1F *_channel_indicator_histogram = new TH1F(name_.str().c_str(), title_.str().c_str(), 96, -.5, 95.5);
+                _channel_indicator_histogram->SetFillColor(_channel_color);
+                _channel_indicator_histogram->SetLineColor(_channel_color);
+                channel_stacks_[_active_linkboard.getId()]->Add(_channel_indicator_histogram);
+                channel_legends_[_active_linkboard.getId()]->AddEntry(_channel_indicator_histogram, _channel_indicator_histogram->GetTitle(), "f");
+
+                name_.str("");
+                title_.str("");
+                name_ << "RPCDetId_" << _active_roll.getRPCDetId().id() << "_" << _active_febconnector.getRollConnector() << "_ind";
+                title_ << "RPC C" << _active_febconnector.getRollConnector() << " - " << _active_linkbox.getName() << " LB" << _active_linkboard.getPosition() << " C" << _active_febconnector.getPosition();
+                TH1F *_strip_indicator_histogram = new TH1F(name_.str().c_str(), title_.str().c_str(), 96, .5, 96.5);
+                _strip_indicator_histogram->SetFillColor(_strip_color);
+                _strip_indicator_histogram->SetLineColor(_strip_color);
+                strip_stacks_[_active_roll]->Add(_strip_indicator_histogram);
+                strip_legends_[_active_roll]->AddEntry(_strip_indicator_histogram, _strip_indicator_histogram->GetTitle(), "f");
+
+                // Fill the indicator histograms
+                int _channel = (_active_febconnector.getPosition() - 1) * rpct::fct::FebConnectorStrips::npins_;
+                for (int _pin = 1; _pin <= rpct::fct::FebConnectorStrips::npins_; ++_pin, ++_channel)
+                    if (_active_febconnector.getStrips().isPinActive(_pin))
+                    {
+                        _channel_indicator_histogram->SetBinContent(_channel + 1, 2);
+                        _strip_indicator_histogram->SetBinContent(_active_febconnector.getStrips().getStrip(_pin), 2);
+                    }
+
+                _channel_indicator_histogram->Write();
+                _strip_indicator_histogram->Write();
+
+                // Fill Histograms
+                TH1F *_linkboard_histogram = linkboard_histograms_[_active_linkboard.getId()];
+
+                for (std::vector<rpct::fct::LinkBoard *>::const_iterator _linkboard_it = _active_linkbox.getLinkBoards().begin(); _linkboard_it != _active_linkbox.getLinkBoards().end(); ++_linkboard_it)
+                    if (*_linkboard_it)
+                        for (std::vector<rpct::fct::FebConnector *>::const_iterator _febconnector_it = (*_linkboard_it)->getFebConnectors().begin(); _febconnector_it != (*_linkboard_it)->getFebConnectors().end(); ++_febconnector_it)
+                            if (*_febconnector_it)
                             {
-                                if (strip_histograms_.find(_febconnector.getRoll()) == strip_histograms_.end())
+                                rpct::fct::FebConnector const &_febconnector(*(*_febconnector_it));
+                                if (_febconnector.isSelected())
+                                    _linkboard_histogram->AddBinContent(((*_linkboard_it)->getPosition() - 1) * rpct::fct::LinkBoard::nfebconnectors_ + (*_febconnector_it)->getPosition(), (*_linkboard_it)->getAvgRate((*_febconnector_it)->getPosition()));
+                                if (_febconnector.getRoll().getChamberId() == _active_chamber)
                                 {
-                                    name_.str("");
-                                    name_ << "RPCDetId_" << _febconnector.getRoll().getRPCDetId().id();
-                                    TH1F *_strip_histogram = (strip_histograms_[_febconnector.getRoll()] = new TH1F(name_.str().c_str(), _active_roll.name().c_str(), 96, .5, 96.5));
-                                    _strip_histogram->SetLineColor(_strip_color);
-                                    _strip_histogram->SetLineWidth(2);
-                                    strip_stacks_[_febconnector.getRoll()]->Add(_strip_histogram);
-                                }
-                                TH1F *_strip_histogram = strip_histograms_[_febconnector.getRoll()];
-                                // Fill the histogram
-                                int _channel = (_febconnector.getPosition() - 1) * rpct::fct::FebConnectorStrips::npins_;
-                                for (int _pin = 1; _pin <= rpct::fct::FebConnectorStrips::npins_; ++_pin, ++_channel)
-                                    if (_febconnector.getStrips().isPinActive(_pin))
-                                        _strip_histogram->SetBinContent(_febconnector.getStrips().getStrip(_pin), _febconnector.getLinkBoard().getRate(_channel));
-                            }
-                            if (_febconnector != _active_febconnector)
-                            { // active or noisy?
-                                int _channel = (_febconnector.getPosition() - 1) * rpct::fct::FebConnectorStrips::npins_;
-                                int _active_channels(0), _noisy_channels(0);
-                                for (int _pin = 1; _pin <= rpct::fct::FebConnectorStrips::npins_; ++_pin, ++_channel)
-                                    if (_febconnector.getStrips().isPinActive(_pin))
+                                    if (strip_histograms_.find(_febconnector.getRoll()) == strip_histograms_.end())
                                     {
-                                        if (_febconnector.getLinkBoard().getRate(_channel) > rate_active_)
-                                            ++_active_channels;
-                                        if (_febconnector.getLinkBoard().getRate(_channel) > rate_noisy_)
-                                            ++_noisy_channels;
+                                        name_.str("");
+                                        name_ << "RPCDetId_" << _febconnector.getRoll().getRPCDetId().id();
+                                        TH1F *_strip_histogram = (strip_histograms_[_febconnector.getRoll()] = new TH1F(name_.str().c_str(), _active_roll.name().c_str(), 96, .5, 96.5));
+                                        _strip_histogram->SetLineColor(_strip_color);
+                                        _strip_histogram->SetLineWidth(2);
+                                        strip_stacks_[_febconnector.getRoll()]->Add(_strip_histogram);
                                     }
+                                    TH1F *_strip_histogram = strip_histograms_[_febconnector.getRoll()];
+                                    // Fill the histogram
+                                    int _channel = (_febconnector.getPosition() - 1) * rpct::fct::FebConnectorStrips::npins_;
+                                    for (int _pin = 1; _pin <= rpct::fct::FebConnectorStrips::npins_; ++_pin, ++_channel)
+                                        if (_febconnector.getStrips().isPinActive(_pin))
+                                            _strip_histogram->SetBinContent(_febconnector.getStrips().getStrip(_pin), _febconnector.getLinkBoard().getRate(_channel));
+                                }
+                                if (_febconnector != _active_febconnector)
+                                { // active or noisy?
+                                    int _channel = (_febconnector.getPosition() - 1) * rpct::fct::FebConnectorStrips::npins_;
+                                    int _active_channels(0), _noisy_channels(0);
+                                    for (int _pin = 1; _pin <= rpct::fct::FebConnectorStrips::npins_; ++_pin, ++_channel)
+                                        if (_febconnector.getStrips().isPinActive(_pin))
+                                        {
+                                            if (_febconnector.getLinkBoard().getRate(_channel) > rate_active_)
+                                                ++_active_channels;
+                                            if (_febconnector.getLinkBoard().getRate(_channel) > rate_noisy_)
+                                                ++_noisy_channels;
+                                        }
 
-                                if (_active_is_dead && (double)_active_channels / (double)_febconnector.getStrips().getNStrips() > channel_fraction_ && offset_connector_ignore_index_.find(_febconnector.getId()) == offset_connector_ignore_index_.end() && noisy_connector_ignore_index_.find(_febconnector.getId()) == noisy_connector_ignore_index_.end())
-                                    swap_connectors_[_active_febconnector.getId()].push_back(_febconnector.getId());
+                                    if (_active_is_dead && (double)_active_channels / (double)_febconnector.getStrips().getNStrips() > channel_fraction_ && offset_connector_ignore_index_.find(_febconnector.getId()) == offset_connector_ignore_index_.end() && noisy_connector_ignore_index_.find(_febconnector.getId()) == noisy_connector_ignore_index_.end())
+                                        swap_connectors_[_active_febconnector.getId()].push_back(_febconnector.getId());
 
-                                if ((double)_noisy_channels / (double)_febconnector.getStrips().getNStrips() > channel_fraction_ && offset_connector_ignore_index_.find(_febconnector.getId()) == offset_connector_ignore_index_.end())
-                                    noisy_connector_problem_.push_back(_febconnector.getId());
+                                    if ((double)_noisy_channels / (double)_febconnector.getStrips().getNStrips() > channel_fraction_ && offset_connector_ignore_index_.find(_febconnector.getId()) == offset_connector_ignore_index_.end())
+                                        noisy_connector_problem_.push_back(_febconnector.getId());
+                                }
                             }
-                        }
-            for (std::map<rpct::tools::RollId, TH1F *>::iterator _strip_histogram_it = strip_histograms_.begin(); _strip_histogram_it != strip_histograms_.end(); ++_strip_histogram_it)
-                _strip_histogram_it->second->Write();
-            strip_histograms_.clear();
+                for (std::map<rpct::tools::RollId, TH1F *>::iterator _strip_histogram_it = strip_histograms_.begin(); _strip_histogram_it != strip_histograms_.end(); ++_strip_histogram_it)
+                    _strip_histogram_it->second->Write();
+                strip_histograms_.clear();
 
-            // Channel Histogram
-            TH1F *_channel_histogram = new TH1F(_active_linkboard.getName().c_str(), _active_linkboard.getName().c_str(), 96, -.5, 95.5);
-            _channel_histogram->SetLineColor(_channel_color);
-            _channel_histogram->SetLineWidth(2);
-            for (std::size_t _channel = 0; _channel < rpct::fct::LinkBoard::nchannels_; ++_channel)
-                _channel_histogram->SetBinContent(_channel + 1, _active_linkboard.getRate(_channel));
-            _channel_histogram->Write();
-            channel_stacks_[_active_linkboard.getId()]->Add(_channel_histogram);
+                // Channel Histogram
+                TH1F *_channel_histogram = new TH1F(_active_linkboard.getName().c_str(), _active_linkboard.getName().c_str(), 96, -.5, 95.5);
+                _channel_histogram->SetLineColor(_channel_color);
+                _channel_histogram->SetLineWidth(2);
+                for (std::size_t _channel = 0; _channel < rpct::fct::LinkBoard::nchannels_; ++_channel)
+                    _channel_histogram->SetBinContent(_channel + 1, _active_linkboard.getRate(_channel));
+                _channel_histogram->Write();
+                channel_stacks_[_active_linkboard.getId()]->Add(_channel_histogram);
+            }
         }
     }
     for (std::map<rpct::hwd::integer_type, TH1F *>::iterator _linkboard_histogram_it = linkboard_histograms_.begin(); _linkboard_histogram_it != linkboard_histograms_.end(); ++_linkboard_histogram_it)

@@ -11,7 +11,7 @@ public:
     TangoColors(int _offset = 10000);
     ~TangoColors();
 
-    static void createColors(int _offset = 1000, bool _force = false);
+    static void createColors(int _offset = 10000, bool _force = false);
     static std::map<std::string, TColor *> const & getColors();
 
     static TColor const & getTangoSkyBlueA();

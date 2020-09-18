@@ -49,6 +49,7 @@ Inside the container.
 ```
 cd /opt/febconntest
 cmake .
+make
 ```
 
 ## Running
