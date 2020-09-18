@@ -4,4 +4,4 @@
 
 ## Build deploy image
 
-`cd build ; docker build --tag ftorresd/rpcfebconnectivitytest . ; cd ..`
+`cd deploy ; docker build --tag ftorresd/rpcfebconnectivitytest . ; cd ..`
