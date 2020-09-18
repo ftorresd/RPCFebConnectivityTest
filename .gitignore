@@ -1,3 +1,7 @@
+data
+*.pdf
+*.txt
+*.db
 .DS_Store
 ._*
 **/._*

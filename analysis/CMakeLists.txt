@@ -21,6 +21,9 @@ target_link_libraries(parseid tools)
 add_executable(connectivitytest "${CMAKE_CURRENT_SOURCE_DIR}/src/common/connectivitytest.cpp")
 target_link_libraries(connectivitytest analysis tools FebConnectivityTest hwd ${ROOT_LIBRARY})
 
+add_executable(thscan "${CMAKE_CURRENT_SOURCE_DIR}/src/common/thscan.cpp")
+target_link_libraries(thscan analysis tools FebConnectivityTest hwd ${ROOT_LIBRARY})
+
 if(NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Release")
     file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/cfg" 
         DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/")

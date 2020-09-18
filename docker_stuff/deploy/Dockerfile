@@ -7,7 +7,7 @@ ENV LANG=C.UTF-8
 
 WORKDIR /opt
 
-ARG TAG_NAME=1.0
+ARG TAG_NAME=1.0.2
 
 RUN apt update -y && \
     apt upgrade -y && \
