@@ -265,13 +265,14 @@ int main(int _argc, char *_argv[])
 
         LOG4CPLUS_INFO(logger_, "Snapshot " << _nsnapshot << "/" << _nsnapshots << ": " << rpct::tools::Date(_snapshot->getTime()));
 
-
         // skip the first connectivitytest step
         // needed ?
-        if (_nsnapshot == 1) continue;
+        if (_nsnapshot == 1)
+            continue;
 
         // DEBUG: only the first snapshot
-        if (_nsnapshot != 20) continue; //DEBUG
+        if (_nsnapshot != 20)
+            continue; //DEBUG
 
         std::vector<rpct::fct::LinkBox *> _linkboxes = febsystem_.getLinkBoxes();
         for (std::vector<rpct::fct::LinkBox *>::const_iterator _linkbox_it = _linkboxes.begin(); _linkbox_it != _linkboxes.end(); ++_linkbox_it)
@@ -288,14 +289,29 @@ int main(int _argc, char *_argv[])
                             if (*_febconnector_it && roll_selection_.matches((*_febconnector_it)->getRoll()))
                             {
                                 rpct::fct::FebConnector const &_febconnector = *(*_febconnector_it);
-
-                                int _channel = (_febconnector.getPosition() - 1) * rpct::fct::FebConnectorStrips::npins_;
-                                std::cout << "Channel: " << _channel << std::endl;
-                                for (int _pin = 1; _pin <= rpct::fct::FebConnectorStrips::npins_; ++_pin, ++_channel)
+                                if (_febconnector.isSelected())
                                 {
-                                    if (_febconnector.getStrips().isPinActive(_pin)) {
-                                        std::cout << "Pin: " << _pin << " - Rate: " << _linkboard.getRate(_channel) << std::endl;
-                                    }
+                                    rpct::fct::FebChip const &_febchip_0 = _febconnector.getFebPart().getFebChip(0);
+                                    rpct::fct::FebChip const &_febchip_1 = _febconnector.getFebPart().getFebChip(1);
+
+                                    std::cout << "Roll: " << _febconnector.getRoll().name() << 
+                                        " - Connector Position: " << _febconnector.getPosition()-1 <<
+                                        // " - _febchip_0: " << _febchip_0 <<
+                                        // " - Avg Rate: " << _linkboard.getAvgRate(_febconnector.getPosition()) << std::endl;
+                                        std::endl;
+
+                                    // std::cout << "Roll Name: " << _febconnector.getRoll().name() << std::endl;
+                                    // int _channel = (_febconnector.getPosition() - 1) * rpct::fct::FebConnectorStrips::npins_;
+                                    // std::cout << "Channel: " << _channel << std::endl;
+                                    // for (int _pin = 1; _pin <= rpct::fct::FebConnectorStrips::npins_; ++_pin, ++_channel)
+                                    // {
+                                    //     if (_febconnector.getStrips().isPinActive(_pin))
+                                    //     {
+                                    //         // if (_linkboard.getRate(_channel) != 0) {
+                                    //         std::cout << "Pin: " << _pin << " - Rate: " << _linkboard.getRate(_channel) << std::endl;
+                                    //         // }
+                                    //     }
+                                    // }
                                 }
                             }
                         }
@@ -303,7 +319,6 @@ int main(int _argc, char *_argv[])
                 }
             }
         }
-
     }
 
     if (output_file_)
