@@ -485,7 +485,7 @@ int main(int _argc, char *_argv[])
         TDirectory *_directory = working_directory_->mkdir(rpct::tools::Date(_snapshot->getTime()).filename().c_str());
         _directory->cd();
 
-        int _linkboard_color(10000), _channel_color(10000), _strip_color(10000);
+        int _linkboard_color(20000), _channel_color(20000), _strip_color(20000);
 
         if (_nsnapshot > 1 ) // skip the first connectivitytest step
         {
@@ -525,9 +525,9 @@ int main(int _argc, char *_argv[])
                         partially_dead_connector_.push_back(_active_febconnector.getId());
                 }
 
-                _strip_color = _active_febconnector.getRollConnector() + 10000;
-                _channel_color = _active_febconnector.getPosition() + 10000;
-                _linkboard_color = _active_linkboard.getPosition() + 10000;
+                _strip_color = _active_febconnector.getRollConnector() + 20000;
+                _channel_color = _active_febconnector.getPosition() + 20000;
+                _linkboard_color = _active_linkboard.getPosition() + 20000;
 
                 // Indicator Histograms and LinkBoard Histogram
                 if (linkboard_histograms_.find(_active_linkboard.getId()) == linkboard_histograms_.end())
