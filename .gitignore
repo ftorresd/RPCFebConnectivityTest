@@ -3,6 +3,7 @@ dbfiles_buffer/*.pdf
 dbfiles_buffer/*.txt
 dbfiles_buffer/*.root
 dbfiles_buffer/*.db
+dbfiles_buffer/*.tar.gz
 buffer/
 .vscode/
 .DS_Store
