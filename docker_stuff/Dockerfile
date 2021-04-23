@@ -25,4 +25,16 @@ ENV PATH $ROOTSYS/bin:$PATH
 ENV PYTHONPATH $ROOTSYS/lib:$PYTHONPATH
 ENV CLING_STANDARD_PCH none
 
-CMD ["bash"]
+RUN wget https://github.com/ftorresd/RPCFebConnectivityTest/archive/refs/heads/master.zip && \
+    apt install -y unzip && \
+    unzip master.zip && \
+    mv RPCFebConnectivityTest-master RPCFebConnectivityTest && \
+    cd RPCFebConnectivityTest && \
+    cmake . && \
+    make
+
+ENV PATH /opt/RPCFebConnectivityTest/bin:$PATH
+
+WORKDIR /data
+
+CMD ["/opt/RPCFebConnectivityTest/bin/connectivitytest"]

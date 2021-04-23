@@ -36,21 +36,9 @@ cmake .
 make
 ```
 
-## Docker
+## Build Docker image
 
-Launch the container.
-
-```
-docker run -v `pwd`:/opt/febconntest -it ftorresd/rpcfebconnectivitytest_buildenv
-```
-
-Inside the container.
-
-```
-cd /opt/febconntest
-cmake .
-make
-```
+`cd docker_stuff ; docker build --tag ftorresd/rpcfebconnectivitytest . ; cd ..`
 
 ## Running
 
